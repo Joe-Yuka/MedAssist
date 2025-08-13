@@ -1,0 +1,447 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "id": "fd17a74d-9c86-4f02-83cb-dcffddbdbab1",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        520,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "c0401bdc-ba45-469c-9dff-5f84647a3d55",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        600,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert medical diagnostician. Based on the user's symptoms provided, analyze them against the knowledge from your documents. Your task is to list the most likely diseases and their probability as a percentage.\n\nIMPORTANT: You MUST respond ONLY with a JSON object in the following format. Do not add any text, explanations, or markdown formatting before or after the JSON object.\n\n{\n  \"results\": [\n    {\"disease\": \"Name of Disease 1\", \"percentage\": 98},\n    {\"disease\": \"Name of Disease 2\", \"percentage\": 85},\n    {\"disease\": \"Name of Disease 3\", \"percentage\": 70}\n  ]\n}\n\nIf no diagnosis is possible, return an empty results array: {\"results\": []}"
+        }
+      },
+      "id": "95b472fb-0148-498c-a3ec-2cc6db69dae4",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1380,
+        120
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "content": "## Workflow untuk membaca database dan chatbot"
+      },
+      "id": "349d7d22-d7c6-49a4-9e48-a2b91648cae1",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1320,
+        -100
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Menambahkan Google Document untuk sumber database atau buku medis yang akan dibaca RAG untuk LLM",
+        "height": 180,
+        "width": 380
+      },
+      "id": "b247de14-f84e-4a2e-b542-77da1bf54ccb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        140,
+        -120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "57a91ec8-4da2-4d41-94c2-fed98b7d40f2",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -20,
+        120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1uucWnl2WUSL6EDl3Vts5SlKnOuAUgLwLGEw-8MWdTRg/edit?usp=sharing"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        180,
+        120
+      ],
+      "id": "9c2f433e-8990-4f81-a48b-720af31708ec",
+      "name": "Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3GA3axZbo2AEoXwl",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "embedding",
+          "mode": "list",
+          "cachedResultName": "embedding"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        120
+      ],
+      "id": "fb5ac4e0-4549-4eb8-8be0-58bfcbe00e70",
+      "name": "Pinecone Vector Store",
+      "executeOnce": false,
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZOV91UT7i5ywRqUm",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "company_documents_tool",
+        "description": "Data here"
+      },
+      "id": "25e29f74-e6e5-4025-9629-7fd445e4e9be",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "position": [
+        1640,
+        320
+      ],
+      "typeVersion": 1,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "embedding",
+          "mode": "list",
+          "cachedResultName": "embedding"
+        },
+        "options": {}
+      },
+      "id": "2f3e2a31-dd4c-492e-9a4f-3d1f00c9152c",
+      "name": "Pinecone Vector Store (Retrieval)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1520,
+        480
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZOV91UT7i5ywRqUm",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        360
+      ],
+      "id": "57276d40-a4a1-4ade-88f8-fa5808c565c8",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "5QMzU6l6Tvc7stSm",
+          "name": "Azure Open AI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        380,
+        320
+      ],
+      "id": "029a1913-a7b3-4197-8996-f15db628f05e",
+      "name": "Embeddings Azure OpenAI",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "5QMzU6l6Tvc7stSm",
+          "name": "Azure Open AI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        480
+      ],
+      "id": "57aa81b1-f1f1-4365-920b-0a106cf66e57",
+      "name": "Azure OpenAI Chat Model (Retrieval)",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "5QMzU6l6Tvc7stSm",
+          "name": "Azure Open AI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        640
+      ],
+      "id": "997ab015-eaae-42b3-a3c1-7488a240e270",
+      "name": "Embeddings Azure OpenAI (Retrieval)",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "5QMzU6l6Tvc7stSm",
+          "name": "Azure Open AI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aaf8142f-6169-4d40-a41c-f9f8516b2ebf",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        -20
+      ],
+      "id": "b103f946-42c5-4864-a0d7-f7416aa4681a",
+      "name": "Webhook1",
+      "webhookId": "aaf8142f-6169-4d40-a41c-f9f8516b2ebf"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.3,
+      "position": [
+        1740,
+        120
+      ],
+      "id": "9257c571-f699-42e9-bf3e-093b1be4ce5b",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store (Retrieval)": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Azure OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model (Retrieval)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Azure OpenAI (Retrieval)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store (Retrieval)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8bce403f-c549-4438-83bd-046da4550d60",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8efc3f993c6406c38e8103411c779f4b9d721b6bd3f70c3e9ed940e02d5bfa09"
+  },
+  "id": "R7c5mnaao4xKCXWB",
+  "tags": []
+}
